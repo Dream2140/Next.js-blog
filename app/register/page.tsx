@@ -6,6 +6,7 @@ import Link from "next/link";
 import { ROUTES } from "@/constants/routes";
 import { Button } from "@/components/Button/Button";
 import { signIn } from "next-auth/react";
+import Spinner from "@/components/Spinner/Spinner";
 
 interface UserDataStateProps {
   name: string;
@@ -21,10 +22,13 @@ const userDataState: UserDataStateProps = {
 
 export default function Register() {
   const [userData, setUserData] = useState<UserDataStateProps>(userDataState);
-
   const [error, setError] = useState<string>("");
+  const [loading, setLoading] = useState<boolean>(false);
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
+
+    setLoading(true);
+
     try {
       const request = await fetch("/api/register", {
         method: "POST",
@@ -47,6 +51,8 @@ export default function Register() {
       }
     } catch (e) {
       console.error(e);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -89,7 +95,7 @@ export default function Register() {
           value={userData.password}
           required
         />
-        <Button type="submit">Submit</Button>
+        <Button type="submit"> {loading ? <Spinner /> : "Submit"}</Button>
       </div>
 
       <div>

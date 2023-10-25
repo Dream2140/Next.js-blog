@@ -41,7 +41,7 @@ const BlogList = ({ blogListData }: BlogListProps) => {
       pageStart={1}
       loadMore={loadMore}
       loader={
-        <span key={0} className="loader">
+        <span key={0} className="loader flex justify-center text-xl p-10">
           Loading ...
         </span>
       }

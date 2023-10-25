@@ -7,6 +7,7 @@ import Input from "@/components/Input/Input";
 import Link from "next/link";
 import { ROUTES } from "@/constants/routes";
 import { Button } from "@/components/Button/Button";
+import Spinner from "@/components/Spinner/Spinner";
 
 interface InitialUserDataProps {
   name: string;
@@ -24,21 +25,29 @@ export default function Login() {
   const router = useRouter();
   const [userData, setUserData] = useState(initialUserData);
   const [error, setError] = useState<string>("");
+  const [loading, setLoading] = useState(false);
 
   const onSubmit = async (event: FormEvent) => {
     event.preventDefault();
+    try {
+      setLoading(true);
 
-    const login = await signIn("credentials", {
-      ...userData,
-      redirect: false,
-    });
+      const login = await signIn("credentials", {
+        ...userData,
+        redirect: false,
+      });
 
-    if (login?.error) {
-      return setError(login.error);
+      if (login?.error) {
+        return setError(login.error);
+      }
+
+      router.refresh();
+      router.back();
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setLoading(false);
     }
-
-    router.refresh();
-    router.back();
   };
 
   function handleChange(event: ChangeEvent<HTMLInputElement>) {
@@ -71,7 +80,9 @@ export default function Login() {
           value={userData.password}
           required
         />
-        <Button type="submit">Log in</Button>
+        <Button type="submit" disabled={loading}>
+          {loading ? <Spinner /> : "Log in"}
+        </Button>
       </div>
 
       <div>

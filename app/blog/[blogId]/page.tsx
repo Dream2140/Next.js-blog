@@ -2,6 +2,7 @@ import Image from "next/image";
 interface IParams {
   blogId: string;
 }
+
 const BlogPage = async ({ params }: { params: IParams }) => {
   const response = await fetch(
     `${process.env.SITE_URL}/api/blog/${params.blogId}`,
@@ -35,3 +36,14 @@ const BlogPage = async ({ params }: { params: IParams }) => {
 };
 
 export default BlogPage;
+
+export async function generateStaticParams() {
+  const posts = await fetch(`${process.env.SITE_URL}/api/blog`).then((res) =>
+    res.json(),
+  );
+
+  // @ts-ignore
+  return posts.data.map((post) => ({
+    slug: post.id,
+  }));
+}
