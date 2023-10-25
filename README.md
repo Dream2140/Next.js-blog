@@ -8,7 +8,7 @@
 
 <h2>Project Screenshots:</h2>
 
-<img src="https://ibb.co/wR9fX68" alt="project-screenshot" width="400" height="400/">
+![Blog main page](https://github.com/Dream2140/Simple-Blog/blob/main/screen.png)
 
   
   
