@@ -1,4 +1,5 @@
 import prisma from "@/app/lib/prismadb";
+import { MOCK_POSTS } from "@/app/lib/mockPosts";
 
 export interface BlogListResponse {
   total: number;
@@ -26,6 +27,24 @@ export interface PostPayload {
 
 const DEFAULT_PAGE = 1;
 const MAX_LIMIT = 50;
+
+function getFallbackPosts() {
+  return MOCK_POSTS;
+}
+
+function paginateFallback(page: number, limit: number): BlogListResponse {
+  const pagination = normalizePagination(page, limit);
+  const posts = getFallbackPosts();
+  const data = posts.slice(pagination.offset, pagination.offset + pagination.limit);
+
+  return {
+    total: posts.length,
+    page: pagination.page,
+    limit: pagination.limit,
+    hasNextPage: pagination.offset + pagination.limit < posts.length,
+    data,
+  };
+}
 
 function toBlogDto(blog: {
   id: string;
@@ -103,18 +122,11 @@ export async function getBlogPage(page: number, limit: number): Promise<BlogList
       page: pagination.page,
       limit: pagination.limit,
       hasNextPage: pagination.offset + pagination.limit < totalCount,
-      data: posts.map(toBlogDto),
+      data: totalCount > 0 ? posts.map(toBlogDto) : paginateFallback(page, limit).data,
     };
   } catch (error) {
     console.error("getBlogPage failed", error);
-
-    return {
-      total: 0,
-      page: pagination.page,
-      limit: pagination.limit,
-      hasNextPage: false,
-      data: [],
-    };
+    return paginateFallback(page, limit);
   }
 }
 
@@ -126,10 +138,11 @@ export async function getAllBlogs() {
       },
     });
 
-    return posts.map(toBlogDto);
+    const normalizedPosts = posts.map(toBlogDto);
+    return normalizedPosts.length > 0 ? normalizedPosts : getFallbackPosts();
   } catch (error) {
     console.error("getAllBlogs failed", error);
-    return [];
+    return getFallbackPosts();
   }
 }
 
@@ -145,10 +158,10 @@ export async function getBlogById(blogId: string) {
       },
     });
 
-    return blog ? toBlogDto(blog) : null;
+    return blog ? toBlogDto(blog) : getFallbackPosts().find((post) => post.id === blogId) || null;
   } catch (error) {
     console.error("getBlogById failed", error);
-    return null;
+    return getFallbackPosts().find((post) => post.id === blogId) || null;
   }
 }
 
@@ -160,9 +173,10 @@ export async function getBlogIds() {
       },
     });
 
-    return posts.map((post) => post.id);
+    const ids = posts.map((post) => post.id);
+    return ids.length > 0 ? ids : getFallbackPosts().map((post) => post.id);
   } catch (error) {
     console.error("getBlogIds failed", error);
-    return [];
+    return getFallbackPosts().map((post) => post.id);
   }
 }
