@@ -1,9 +1,9 @@
 import { getAllBlogs } from "@/app/lib/posts";
 import { toBlogospherePosts } from "@/app/lib/blogosphere";
-import FeedScreen from "@/components/blogosphere/FeedScreen";
+import ArchiveScreen from "@/components/blogosphere/ArchiveScreen";
 
-export default async function Home() {
+export default async function ArchivePage() {
   const posts = toBlogospherePosts(await getAllBlogs());
 
-  return <FeedScreen posts={posts} />;
+  return <ArchiveScreen posts={posts} />;
 }

@@ -1,11 +1,13 @@
 import "./globals.css";
 import type { Metadata } from "next";
-import Nav from "@/components/Nav/Nav";
 import getCurrentUser from "@/app/actions/getCurrentUser";
+import MatrixRain from "@/components/chrome/MatrixRain";
+import TitleBar from "@/components/chrome/TitleBar";
+import StatusLine from "@/components/chrome/StatusLine";
 
 export const metadata: Metadata = {
-  title: "Blog",
-  description: "Blog app",
+  title: "~/blogosphere",
+  description: "Gruvbox terminal-inspired blog UI",
 };
 
 export default async function RootLayout({
@@ -16,9 +18,13 @@ export default async function RootLayout({
   const currentUser = await getCurrentUser();
   return (
     <html lang="en">
-      <body className="bg-white text-black antialiased">
-        <Nav currentUser={currentUser} />
-        {children}
+      <body>
+        <MatrixRain />
+        <div id="app" className="app-root">
+          <TitleBar currentUser={currentUser} />
+          <main className="main">{children}</main>
+          <StatusLine />
+        </div>
       </body>
     </html>
   );

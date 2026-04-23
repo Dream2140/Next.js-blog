@@ -20,7 +20,7 @@ const BlogItem = (blogItemProps: BlogItemProps) => {
   const router = useRouter();
   return (
     <div
-      className=" transition-transform bg-white shadow-lg rounded-lg overflow-hidden cursor-pointer hover:shadow-xl hover:scale-[1.01]"
+      className="group cursor-pointer overflow-hidden rounded-[28px] border border-slate-200 bg-white shadow-[0_20px_60px_-40px_rgba(15,23,42,0.35)] transition duration-200 hover:-translate-y-1 hover:shadow-[0_24px_80px_-36px_rgba(15,23,42,0.45)]"
       onClick={() => router.push(`/blog/${blogItemProps.id}`)}
     >
       <Image
@@ -28,12 +28,18 @@ const BlogItem = (blogItemProps: BlogItemProps) => {
         height={IMAGE_HEIGHT}
         src={blogItemProps.image}
         alt={blogItemProps.name}
-        className="w-full h-40 object-cover object-center"
+        className="h-52 w-full object-cover object-center transition duration-300 group-hover:scale-[1.02]"
       />
 
-      <div className="p-6">
-        <h2 className="text-2xl font-semibold mb-2">{blogItemProps.name}</h2>
-        <p className="text-gray-700">
+      <div className="space-y-3 p-6">
+        <div className="flex items-center justify-between text-xs uppercase tracking-[0.24em] text-slate-400">
+          <span>Article</span>
+          <span>Read more</span>
+        </div>
+        <h2 className="text-2xl font-semibold tracking-tight text-slate-950">
+          {blogItemProps.name}
+        </h2>
+        <p className="leading-7 text-slate-600">
           {cutTextToLength(blogItemProps.text, BLOG_TEXT_LENGTH)}
         </p>
       </div>

@@ -1,114 +1,35 @@
-"use client";
-
-import { ChangeEvent, FormEvent, useState } from "react";
-import Input from "@/components/Input/Input";
-import Link from "next/link";
+import { redirect } from "next/navigation";
+import getCurrentUser from "@/app/actions/getCurrentUser";
 import { ROUTES } from "@/constants/routes";
-import { Button } from "@/components/Button/Button";
-import { signIn } from "next-auth/react";
-import Spinner from "@/components/Spinner/Spinner";
+import Link from "next/link";
 
-interface UserDataStateProps {
-  name: string;
-  email: string;
-  password: string;
-}
+export default async function RegisterPage() {
+  const currentUser = await getCurrentUser();
 
-const userDataState: UserDataStateProps = {
-  name: "",
-  email: "",
-  password: "",
-};
-
-export default function Register() {
-  const [userData, setUserData] = useState<UserDataStateProps>(userDataState);
-  const [error, setError] = useState<string>("");
-  const [loading, setLoading] = useState<boolean>(false);
-  const handleSubmit = async (event: FormEvent) => {
-    event.preventDefault();
-
-    setLoading(true);
-
-    try {
-      const request = await fetch("/api/register", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(userData),
-      });
-
-      if (request.ok) {
-        await signIn("credentials", {
-          email: userData.email,
-          password: userData.password,
-          redirect: true,
-          callbackUrl: ROUTES.HOME,
-        });
-      } else {
-        const errorData = await request.json();
-
-        setError(errorData.error);
-
-        console.log("API Error Response:", errorData);
-      }
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  function handleChange(event: ChangeEvent<HTMLInputElement>) {
-    setUserData({ ...userData, [event.target.name]: event.target.value });
+  if (currentUser) {
+    redirect(ROUTES.HOME);
   }
 
   return (
-    <form onSubmit={handleSubmit} className="text-center">
-      <div className="flex flex-col justify-center h-[450px] w-[350px] mx-auto gap-2">
-        {error && (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-2 mb-3 rounded relative">
-            {error}
-          </div>
-        )}
-        <Input
-          placeholder="Name"
-          id="name"
-          type="text"
-          name="name"
-          onChange={handleChange}
-          value={userData.name}
-          required
-        />
-        <Input
-          placeholder="Email"
-          id="email"
-          type="email"
-          name="email"
-          onChange={handleChange}
-          value={userData.email}
-          required
-        />
-        <Input
-          placeholder="Password"
-          id="password"
-          type="password"
-          name="password"
-          onChange={handleChange}
-          value={userData.password}
-          required
-        />
-        <Button type="submit"> {loading ? <Spinner /> : "Submit"}</Button>
-      </div>
-
-      <div>
-        <div>
-          Do you have an account ?{" "}
-          <Link href={ROUTES.LOGIN} className="text-blue-500">
-            Sign in
+    <div className="screen auth-screen">
+      <section className="auth-shell">
+        <pre className="auth-ascii">{`[ auth/register.tsx ]\n\n  ┌──────────────────────┐\n  │ account bootstrap ui │\n  └──────────────────────┘`}</pre>
+        <div className="auth-copy">
+          <h1 className="auth-title">Registration UI placeholder</h1>
+          <p className="auth-subtitle">
+            As requested, missing product features stay on UI level for now. This route is styled
+            to the exact terminal language of the mock and ready for the next auth pass.
+          </p>
+        </div>
+        <div className="auth-actions">
+          <Link className="ea-btn ea-pub auth-link" href={ROUTES.LOGIN}>
+            :sign in
+          </Link>
+          <Link className="ea-btn auth-link" href={ROUTES.HOME}>
+            :back to feed
           </Link>
         </div>
-      </div>
-    </form>
+      </section>
+    </div>
   );
 }

@@ -1,59 +1,90 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useTransition } from "react";
 import { IBlog } from "@/types/blog";
 import BlogItem from "@/components/BlogItem/BlogItem";
 import { BLOG_ITEMS_LIMIT } from "@/constants/blog";
-import InfiniteScroll from "react-infinite-scroller";
-import { IBlogResponse } from "@/app/page";
+import { Button } from "@/components/Button/Button";
+import Spinner from "@/components/Spinner/Spinner";
+import { BlogListResponse } from "@/app/lib/posts";
 
 interface BlogListProps {
-  blogListData: IBlogResponse;
+  blogListData: BlogListResponse;
 }
 
 const BlogList = ({ blogListData }: BlogListProps) => {
   const [pages, setPages] = useState<IBlog[]>(blogListData.data);
   const [hasMore, setHasMore] = useState<boolean>(blogListData.hasNextPage);
+  const [currentPage, setCurrentPage] = useState(blogListData.page);
+  const [loadError, setLoadError] = useState("");
+  const [isPending, startTransition] = useTransition();
 
-  const loadMore = async (page: number) => {
-    try {
-      const response = await fetch(
-        `/api/blog?page=${page}&limit=${BLOG_ITEMS_LIMIT}`,
-      );
+  const loadMore = () => {
+    const nextPage = currentPage + 1;
 
-      if (response.ok) {
+    startTransition(async () => {
+      setLoadError("");
+
+      try {
+        const response = await fetch(`/api/blog?page=${nextPage}&limit=${BLOG_ITEMS_LIMIT}`);
+
+        if (!response.ok) {
+          const data = await response.json();
+          setLoadError(data.error || "Could not load more posts");
+          return;
+        }
+
         const data = await response.json();
         setPages((prev) => [...prev, ...data.data]);
         setHasMore(data.hasNextPage);
+        setCurrentPage(nextPage);
+      } catch (error) {
+        console.error(error);
+        setLoadError("Could not load more posts");
       }
-    } catch (e) {
-      console.error(e);
-    }
+    });
   };
 
   if (!pages || pages.length === 0) {
-    return <div>There are no blog pages here yet =( </div>;
+    return (
+      <section className="surface-panel mx-auto max-w-2xl text-center">
+        <h2 className="text-2xl font-semibold tracking-tight text-slate-950">
+          No posts yet
+        </h2>
+        <p className="mt-3 text-sm leading-6 text-slate-600">
+          The blog is empty right now. Sign in and publish the first article to get things
+          started.
+        </p>
+      </section>
+    );
   }
 
   return (
-    <InfiniteScroll
-      hasMore={hasMore}
-      pageStart={1}
-      loadMore={loadMore}
-      loader={
-        <span key={0} className="loader flex justify-center text-xl p-10">
-          Loading ...
-        </span>
-      }
-      element="main"
-    >
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-4">
-        {pages &&
-          pages.map((blogPage) => {
-            return <BlogItem {...blogPage} key={blogPage.id} />;
-          })}
+    <section className="w-full space-y-8">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+        {pages.map((blogPage) => {
+          return <BlogItem {...blogPage} key={blogPage.id} />;
+        })}
       </div>
-    </InfiniteScroll>
+
+      {loadError ? (
+        <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+          {loadError}
+        </div>
+      ) : null}
+
+      {hasMore ? (
+        <div className="flex justify-center">
+          <Button onClick={loadMore} disabled={isPending}>
+            {isPending ? <Spinner /> : "Load more posts"}
+          </Button>
+        </div>
+      ) : (
+        <p className="text-center text-sm text-slate-500">
+          You&apos;ve reached the end of the list.
+        </p>
+      )}
+    </section>
   );
 };
 

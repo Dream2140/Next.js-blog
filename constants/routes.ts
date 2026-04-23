@@ -3,4 +3,6 @@ export enum ROUTES {
   "HOME" = "/",
   "REGISTER" = "/register",
   "CREATE" = "/create",
+  "ARCHIVE" = "/archive",
+  "PROFILE" = "/profile",
 }

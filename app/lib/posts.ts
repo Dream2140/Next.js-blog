@@ -106,6 +106,16 @@ export async function getBlogPage(page: number, limit: number): Promise<BlogList
   };
 }
 
+export async function getAllBlogs() {
+  const posts = await prisma.blog.findMany({
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+
+  return posts.map(toBlogDto);
+}
+
 export async function getBlogById(blogId: string) {
   if (!blogId) {
     return null;

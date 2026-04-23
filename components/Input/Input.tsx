@@ -40,7 +40,7 @@ export default function Input({
         value={value}
         onChange={onChange}
         name={name}
-        className={`w-full p-4 font-light bg-white border-2 outline-none text-black ${customClass}`}
+        className={`w-full rounded-2xl border border-slate-300 bg-white px-4 py-3 text-black outline-none transition placeholder:text-slate-400 focus:border-sky-500 focus:ring-4 focus:ring-sky-100 ${customClass}`}
       />
     </div>
   );
