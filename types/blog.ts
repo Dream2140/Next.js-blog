@@ -1,7 +1,7 @@
 export interface IBlog {
   id: string;
   name: string;
-  createdAt: Date;
+  createdAt: string;
   image: string;
   text: string;
   userId: string;

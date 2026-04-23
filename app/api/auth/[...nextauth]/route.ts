@@ -3,6 +3,7 @@ import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import CredentialsProvider from "next-auth/providers/credentials";
 import prisma from "../../../lib/prismadb";
 import bcrypt from "bcrypt";
+
 export const authOptions: AuthOptions = {
   adapter: PrismaAdapter(prisma),
   providers: [
@@ -44,7 +45,7 @@ export const authOptions: AuthOptions = {
     }),
   ],
   pages: {
-    signIn: "/",
+    signIn: "/login",
   },
   callbacks: {
     session: ({ session, token }) => {
@@ -53,7 +54,6 @@ export const authOptions: AuthOptions = {
         user: {
           ...session.user,
           id: token.id,
-          randomKey: token.randomKey,
         },
       };
     },
@@ -63,7 +63,6 @@ export const authOptions: AuthOptions = {
         return {
           ...token,
           id: u.id,
-          randomKey: u.randomKey,
         };
       }
       return token;

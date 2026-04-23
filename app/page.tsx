@@ -1,25 +1,12 @@
 import BlogList from "@/components/BlogList/BlogList";
-import { IBlog } from "@/types/blog";
 import { BLOG_ITEMS_LIMIT } from "@/constants/blog";
+import { getBlogPage, type BlogListResponse } from "@/app/lib/posts";
 
-export interface IBlogResponse {
-  total: number;
-  page: number;
-  limit: number;
-  hasNextPage: boolean;
-  data: IBlog[];
-}
-async function fetchItems() {
-  const response = await fetch(
-    `${process.env.SITE_URL}/api/blog?page=1&limit=${BLOG_ITEMS_LIMIT}`,
-    { method: "GET", cache: "force-cache" },
-  );
-
-  return await response.json();
-}
+export type IBlogResponse = BlogListResponse;
 
 export default async function Home() {
-  const blogResponse = await fetchItems();
+  const blogResponse = await getBlogPage(1, BLOG_ITEMS_LIMIT);
+
   return (
     <main className="flex min-h-screen flex-col items-center justify-between p-24">
       <BlogList blogListData={blogResponse} />

@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { ChangeEvent, FormEvent, useState } from "react";
 import Input from "@/components/Input/Input";
 import Link from "next/link";
 import { ROUTES } from "@/constants/routes";
@@ -32,6 +32,9 @@ export default function Register() {
     try {
       const request = await fetch("/api/register", {
         method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify(userData),
       });
 
@@ -56,7 +59,7 @@ export default function Register() {
     }
   };
 
-  function handleChange(event: any) {
+  function handleChange(event: ChangeEvent<HTMLInputElement>) {
     setUserData({ ...userData, [event.target.name]: event.target.value });
   }
 

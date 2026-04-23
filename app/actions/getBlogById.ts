@@ -1,4 +1,4 @@
-import prisma from "../lib/prismadb";
+import { getBlogById } from "@/app/lib/posts";
 
 interface IParams {
   blogId: string;
@@ -8,11 +8,7 @@ export default async function getBlogsById(params: IParams) {
   try {
     const { blogId } = params;
 
-    const listing = await prisma.blog.findUnique({
-      where: {
-        id: blogId,
-      },
-    });
+    const listing = await getBlogById(blogId);
 
     if (!listing) {
       return null;

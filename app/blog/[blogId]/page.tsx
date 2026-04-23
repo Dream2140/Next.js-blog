@@ -1,18 +1,16 @@
 import Image from "next/image";
+import { notFound } from "next/navigation";
+import { getBlogById, getBlogIds } from "@/app/lib/posts";
+
 interface IParams {
   blogId: string;
 }
 
 const BlogPage = async ({ params }: { params: IParams }) => {
-  const response = await fetch(
-    `${process.env.SITE_URL}/api/blog/${params.blogId}`,
-    { method: "GET", cache: "force-cache" },
-  );
-
-  const blogData = await response.json();
+  const blogData = await getBlogById(params.blogId);
 
   if (!blogData) {
-    return <div>Not available</div>;
+    notFound();
   }
 
   return (
@@ -38,12 +36,9 @@ const BlogPage = async ({ params }: { params: IParams }) => {
 export default BlogPage;
 
 export async function generateStaticParams() {
-  const posts = await fetch(`${process.env.SITE_URL}/api/blog`).then((res) =>
-    res.json(),
-  );
+  const blogIds = await getBlogIds();
 
-  // @ts-ignore
-  return posts.data.map((post) => ({
-    slug: post.id,
+  return blogIds.map((blogId) => ({
+    blogId,
   }));
 }

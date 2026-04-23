@@ -1,4 +1,5 @@
 import { getServerSession } from "next-auth/next";
+import { cache } from "react";
 
 import { authOptions } from "../api/auth/[...nextauth]/route";
 import prisma from "../lib/prismadb";
@@ -7,7 +8,7 @@ export async function getSession() {
   return await getServerSession(authOptions);
 }
 
-export default async function getCurrentUser() {
+const getCurrentUser = cache(async () => {
   try {
     const session = await getSession();
 
@@ -34,4 +35,6 @@ export default async function getCurrentUser() {
     console.error(error);
     return null;
   }
-}
+});
+
+export default getCurrentUser;

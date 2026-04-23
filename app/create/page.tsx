@@ -1,8 +1,9 @@
 "use client";
 
-import React, { FormEvent, useState } from "react";
+import React, { ChangeEvent, FormEvent, useState } from "react";
 import Input from "@/components/Input/Input";
 import { Button } from "@/components/Button/Button";
+import { useRouter } from "next/navigation";
 
 interface BlogStateProps {
   name: string;
@@ -17,35 +18,61 @@ const blogDataInitialState: BlogStateProps = {
 };
 
 const Create = () => {
+  const router = useRouter();
   const [blogData, setBlogData] =
     useState<BlogStateProps>(blogDataInitialState);
+  const [error, setError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  function handleChange(event: any) {
+  function handleChange(event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) {
     setBlogData({ ...blogData, [event.target.name]: event.target.value });
   }
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
+    setError("");
 
     if (!blogData.name || !blogData.text || !blogData.image) {
+      setError("All fields are required");
       return;
     }
 
     try {
-      await fetch("/api/blog", {
+      setIsSubmitting(true);
+
+      const response = await fetch("/api/blog", {
         method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify(blogData),
       });
 
+      if (!response.ok) {
+        const data = await response.json();
+        setError(data.error || "Could not create the post");
+        return;
+      }
+
       setBlogData(blogDataInitialState);
+      router.push("/");
+      router.refresh();
     } catch (e) {
       console.error(e);
+      setError("Unexpected error while creating the post");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
   return (
     <form onSubmit={handleSubmit} className="flex justify-center">
       <div className="flex flex-col gap-3 pt-20 pb-20 w-7/12">
+        {error ? (
+          <div className="rounded border border-red-300 bg-red-50 px-4 py-3 text-red-700">
+            {error}
+          </div>
+        ) : null}
         <Input
           placeholder="Blog name"
           id="name"
@@ -82,7 +109,9 @@ const Create = () => {
           required
         />
 
-        <Button type="submit">Post Blog</Button>
+        <Button type="submit" disabled={isSubmitting}>
+          {isSubmitting ? "Publishing..." : "Post Blog"}
+        </Button>
       </div>
     </form>
   );
