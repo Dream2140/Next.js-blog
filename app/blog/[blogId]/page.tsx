@@ -6,6 +6,8 @@ import { getAllBlogs } from "@/app/lib/posts";
 import { toBlogospherePost, toBlogospherePosts } from "@/app/lib/blogosphere";
 import CodeBlock from "@/components/blogosphere/CodeBlock";
 
+export const dynamic = "force-dynamic";
+
 interface IParams {
   blogId: string;
 }
@@ -206,11 +208,3 @@ const BlogPage = async ({ params }: { params: IParams }) => {
 };
 
 export default BlogPage;
-
-export async function generateStaticParams() {
-  const blogIds = await getBlogIds();
-
-  return blogIds.map((blogId) => ({
-    blogId,
-  }));
-}

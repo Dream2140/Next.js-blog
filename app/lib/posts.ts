@@ -86,34 +86,51 @@ export function validatePostPayload(payload: Partial<PostPayload>) {
 export async function getBlogPage(page: number, limit: number): Promise<BlogListResponse> {
   const pagination = normalizePagination(page, limit);
 
-  const [posts, totalCount] = await Promise.all([
-    prisma.blog.findMany({
-      skip: pagination.offset,
-      take: pagination.limit,
-      orderBy: {
-        createdAt: "desc",
-      },
-    }),
-    prisma.blog.count(),
-  ]);
+  try {
+    const [posts, totalCount] = await Promise.all([
+      prisma.blog.findMany({
+        skip: pagination.offset,
+        take: pagination.limit,
+        orderBy: {
+          createdAt: "desc",
+        },
+      }),
+      prisma.blog.count(),
+    ]);
 
-  return {
-    total: totalCount,
-    page: pagination.page,
-    limit: pagination.limit,
-    hasNextPage: pagination.offset + pagination.limit < totalCount,
-    data: posts.map(toBlogDto),
-  };
+    return {
+      total: totalCount,
+      page: pagination.page,
+      limit: pagination.limit,
+      hasNextPage: pagination.offset + pagination.limit < totalCount,
+      data: posts.map(toBlogDto),
+    };
+  } catch (error) {
+    console.error("getBlogPage failed", error);
+
+    return {
+      total: 0,
+      page: pagination.page,
+      limit: pagination.limit,
+      hasNextPage: false,
+      data: [],
+    };
+  }
 }
 
 export async function getAllBlogs() {
-  const posts = await prisma.blog.findMany({
-    orderBy: {
-      createdAt: "desc",
-    },
-  });
+  try {
+    const posts = await prisma.blog.findMany({
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
 
-  return posts.map(toBlogDto);
+    return posts.map(toBlogDto);
+  } catch (error) {
+    console.error("getAllBlogs failed", error);
+    return [];
+  }
 }
 
 export async function getBlogById(blogId: string) {
@@ -121,21 +138,31 @@ export async function getBlogById(blogId: string) {
     return null;
   }
 
-  const blog = await prisma.blog.findUnique({
-    where: {
-      id: blogId,
-    },
-  });
+  try {
+    const blog = await prisma.blog.findUnique({
+      where: {
+        id: blogId,
+      },
+    });
 
-  return blog ? toBlogDto(blog) : null;
+    return blog ? toBlogDto(blog) : null;
+  } catch (error) {
+    console.error("getBlogById failed", error);
+    return null;
+  }
 }
 
 export async function getBlogIds() {
-  const posts = await prisma.blog.findMany({
-    select: {
-      id: true,
-    },
-  });
+  try {
+    const posts = await prisma.blog.findMany({
+      select: {
+        id: true,
+      },
+    });
 
-  return posts.map((post) => post.id);
+    return posts.map((post) => post.id);
+  } catch (error) {
+    console.error("getBlogIds failed", error);
+    return [];
+  }
 }
